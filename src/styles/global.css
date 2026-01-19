@@ -1,142 +1,181 @@
-/*
-  The CSS in this style tag is based off of Bear Blog's default CSS.
-  https://github.com/HermanMartinus/bearblog/blob/297026a877bc2ab2b3bdfbd6b9f7961c350917dd/templates/styles/blog/default.css
-  License MIT: https://github.com/HermanMartinus/bearblog/blob/master/LICENSE.md
- */
- @import "tailwindcss";
- 
+@import "@fontsource/geist-sans/400.css";
+@import "@fontsource/geist-sans/500.css";
+@import "@fontsource/geist-sans/600.css";
+@import "@fontsource/geist-sans/700.css";
+@import "@fontsource/geist-mono/400.css";
+@import "@fontsource/geist-mono/500.css";
+@import "@fontsource/geist-mono/600.css";
+@import "tailwindcss";
+
+/* Dark theme color variables */
 :root {
-	--accent: #2337ff;
-	--accent-dark: #000d8a;
-	--black: 15, 18, 25;
-	--gray: 96, 115, 159;
-	--gray-light: 229, 233, 240;
-	--gray-dark: 34, 41, 57;
-	--gray-gradient: rgba(var(--gray-light), 50%), #fff;
-	--box-shadow:
-		0 2px 6px rgba(var(--gray), 25%), 0 8px 24px rgba(var(--gray), 33%), 0 16px 32px
-		rgba(var(--gray), 33%);
+	--background: #050505;
+	--foreground: #ededed;
 }
-@font-face {
-	font-family: "Atkinson";
-	src: url("/fonts/atkinson-regular.woff") format("woff");
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
+
+@theme inline {
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	/* Font stacks (used by Tailwind utilities like `font-sans` / `font-mono`) */
+	--font-sans: "Geist Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica,
+		Arial, "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+	--font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+		"Courier New", monospace;
 }
-@font-face {
-	font-family: "Atkinson";
-	src: url("/fonts/atkinson-bold.woff") format("woff");
-	font-weight: 700;
-	font-style: normal;
-	font-display: swap;
-}
+
+/* Base body styles with dark theme */
 body {
-	font-family: "Atkinson", sans-serif;
+	background: var(--background);
+	color: var(--foreground);
+	font-family: var(--font-sans);
 	margin: 0;
 	padding: 0;
-	text-align: left;
-	background: linear-gradient(var(--gray-gradient)) no-repeat;
-	background-size: 100% 600px;
-	word-wrap: break-word;
-	overflow-wrap: break-word;
-	color: rgb(var(--gray-dark));
-	font-size: 20px;
-	line-height: 1.7;
 }
-main {
-	width: 720px;
-	max-width: calc(100% - 2em);
-	margin: auto;
-	padding: 3em 1em;
-}
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-	margin: 0 0 0.5rem 0;
-	color: rgb(var(--black));
-	line-height: 1.2;
-}
-h1 {
-	font-size: 3.052em;
-}
-h2 {
-	font-size: 2.441em;
-}
-h3 {
-	font-size: 1.953em;
-}
-h4 {
-	font-size: 1.563em;
-}
-h5 {
-	font-size: 1.25em;
-}
-strong,
-b {
-	font-weight: 700;
-}
-a {
-	color: var(--accent);
-}
-a:hover {
-	color: var(--accent);
-}
-p {
-	margin-bottom: 1em;
-}
-.prose p {
-	margin-bottom: 2em;
-}
-textarea {
-	width: 100%;
-	font-size: 16px;
-}
-input {
-	font-size: 16px;
-}
-table {
-	width: 100%;
-}
-img {
-	max-width: 100%;
-	height: auto;
-	border-radius: 8px;
-}
-code {
-	padding: 2px 5px;
-	background-color: rgb(var(--gray-light));
-	border-radius: 2px;
-}
-pre {
-	padding: 1.5em;
-	border-radius: 8px;
-}
-pre > code {
-	all: unset;
-}
-blockquote {
-	border-left: 4px solid var(--accent);
-	padding: 0 0 0 20px;
-	margin: 0;
-	font-size: 1.333em;
-}
-hr {
-	border: none;
-	border-top: 1px solid rgb(var(--gray-light));
-}
-@media (max-width: 720px) {
-	body {
-		font-size: 18px;
+
+/* Animation utilities */
+@layer utilities {
+	.animate-fade-in {
+		animation: fadeIn 0.6s ease-out forwards;
 	}
-	main {
-		padding: 1em;
+	.animate-fade-in-up {
+		animation: fadeInUp 0.6s ease-out forwards;
 	}
 }
 
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes fadeInUp {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* Blog content styling */
+.blog-content {
+	color: #d1d5db;
+	line-height: 1.8;
+}
+
+.blog-content p {
+	margin: 0 0 1.25rem;
+}
+
+.blog-content h1,
+.blog-content h2,
+.blog-content h3,
+.blog-content h4,
+.blog-content h5,
+.blog-content h6 {
+	margin: 2rem 0 1rem;
+	font-weight: 600;
+	color: white;
+	letter-spacing: -0.025em;
+}
+
+.blog-content h1 {
+	font-size: 2.5rem;
+}
+
+.blog-content h2 {
+	font-size: 2rem;
+}
+
+.blog-content h3 {
+	font-size: 1.5rem;
+}
+
+.blog-content a {
+	color: white;
+	text-decoration: underline;
+	text-decoration-color: #4b5563;
+	text-underline-offset: 4px;
+}
+
+.blog-content a:hover {
+	text-decoration-color: white;
+}
+
+.blog-content blockquote {
+	border-left: 1px solid rgba(255, 255, 255, 0.2);
+	background: rgba(255, 255, 255, 0.05);
+	padding: 0.25rem 1rem;
+	border-radius: 0 0.5rem 0.5rem 0;
+	color: #9ca3af;
+	margin: 1.5rem 0;
+}
+
+.blog-content code {
+	padding: 2px 5px;
+	background-color: rgba(255, 255, 255, 0.1);
+	border-radius: 2px;
+	color: #d4d4d4;
+	font-family: var(--font-mono);
+}
+
+.blog-content pre {
+	background: #0f0f0f;
+	border: 1px solid #222;
+	border-radius: 8px;
+	padding: 1.5rem;
+	font-family: var(--font-mono);
+	font-size: 0.9rem;
+	color: #d4d4d4;
+	margin: 1.5rem 0;
+	overflow-x: auto;
+}
+
+.blog-content pre > code {
+	background: transparent;
+	padding: 0;
+}
+
+/* Code block styling */
+.code-block {
+	background: #0f0f0f;
+	border: 1px solid #222;
+	border-radius: 8px;
+	padding: 1.5rem;
+	font-family: var(--font-mono);
+	font-size: 0.9rem;
+	color: #d4d4d4;
+	margin: 1.5rem 0;
+	overflow-x: auto;
+}
+
+.keyword {
+	color: #fff;
+	font-weight: bold;
+}
+
+.string {
+	color: #a3a3a3;
+}
+
+.comment {
+	color: #525252;
+	font-style: italic;
+}
+
+.highlight {
+	background: rgba(255, 255, 255, 0.05);
+	border-left: 3px solid #fff;
+	padding: 0.5rem 1rem;
+	color: #e5e7eb;
+}
+
+/* Screen reader only utility */
 .sr-only {
 	border: 0;
 	padding: 0;
@@ -145,12 +184,8 @@ hr {
 	height: 1px;
 	width: 1px;
 	overflow: hidden;
-	/* IE6, IE7 - a 0 height clip, off to the bottom right of the visible 1px box */
 	clip: rect(1px 1px 1px 1px);
-	/* maybe deprecated but we need to support legacy browsers */
 	clip: rect(1px, 1px, 1px, 1px);
-	/* modern browsers, clip-path works inwards from each corner */
 	clip-path: inset(50%);
-	/* added line to stop words getting smushed together (as they go onto separate lines and some screen readers do not understand line feeds as a space */
 	white-space: nowrap;
 }

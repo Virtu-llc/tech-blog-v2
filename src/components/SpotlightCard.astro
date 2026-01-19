@@ -1,0 +1,30 @@
+---
+// SpotlightCard component for post cards with hover effects
+interface Props {
+	className?: string;
+	href?: string;
+}
+
+const { className = '', href } = Astro.props;
+const isLink = typeof href === 'string' && href.length > 0;
+
+const baseClass =
+	'relative overflow-hidden rounded-sm border border-white/5 bg-white/5 backdrop-blur-sm transition-colors duration-300';
+const interactiveClass = isLink ? 'cursor-pointer hover:bg-white/10' : '';
+---
+
+{
+	isLink ? (
+		<a href={href} class={`${baseClass} ${interactiveClass} ${className}`}>
+			<div class="relative z-10">
+				<slot />
+			</div>
+		</a>
+	) : (
+		<div class={`${baseClass} ${className}`}>
+			<div class="relative z-10">
+				<slot />
+			</div>
+		</div>
+	)
+}

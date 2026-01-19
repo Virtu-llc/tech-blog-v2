@@ -1,0 +1,318 @@
+---
+// Navigation bar component with mobile menu
+// NOTE: We keep SITE_TITLE for metadata, but the navbar logo should match the old UI.
+
+interface Props {
+	scrolled?: boolean;
+}
+
+const { scrolled = false } = Astro.props;
+
+const NAV_LINKS = [
+	{ name: 'AI Native Web', href: 'https://ai-native-web-home.vercel.app/' },
+	{ name: 'Social Intelligence', href: 'https://www.currents.one/en/' },
+	{ name: 'Product Intelligence', href: 'https://murmur.currents.one/' },
+	{ name: 'Agentic Browser Extension', href: 'https://www.extends.one/' },
+];
+---
+
+<nav
+	class={`navbar ${scrolled ? 'navbar-scrolled' : ''}`}
+	id="navbar"
+	data-nav-visible="true"
+>
+	<div class="navbar-container">
+		<a href="/" class="navbar-logo">
+			{'Currents AI\u00A0\u00A0\u00A0Tech.'}
+		</a>
+
+		<!-- Desktop Navigation -->
+		<div class="navbar-links-desktop">
+			{NAV_LINKS.map((link) => (
+				<a href={link.href} class="navbar-link">
+					{link.name}
+				</a>
+			))}
+		</div>
+
+		<!-- Mobile Menu Button -->
+		<button
+			class="navbar-menu-button"
+			id="mobile-menu-button"
+			aria-label="Toggle menu"
+		>
+			<svg
+				class="menu-icon menu-icon-open"
+				width="24"
+				height="24"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+			>
+				<line x1="3" y1="6" x2="21" y2="6"></line>
+				<line x1="3" y1="12" x2="21" y2="12"></line>
+				<line x1="3" y1="18" x2="21" y2="18"></line>
+			</svg>
+			<svg
+				class="menu-icon menu-icon-close"
+				width="24"
+				height="24"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+			>
+				<line x1="18" y1="6" x2="6" y2="18"></line>
+				<line x1="6" y1="6" x2="18" y2="18"></line>
+			</svg>
+		</button>
+
+		<!-- Mobile Dropdown Menu -->
+		<div class="navbar-menu-mobile" id="mobile-menu">
+			{NAV_LINKS.map((link) => (
+				<a href={link.href} class="navbar-link-mobile">
+					{link.name}
+				</a>
+			))}
+		</div>
+	</div>
+</nav>
+
+<!-- Global Blur Overlay for Mobile -->
+<div class="navbar-overlay" id="mobile-menu-overlay"></div>
+
+<style>
+	.navbar {
+		position: fixed;
+		top: 0;
+		z-index: 50;
+		width: 100%;
+		transition: all 0.5s ease;
+		background: transparent;
+		padding: 1.5rem 0;
+	}
+
+	.navbar-scrolled {
+		background: rgba(5, 5, 5, 0.8);
+		backdrop-filter: blur(12px);
+		padding: 1rem 0;
+	}
+
+	.navbar-container {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		/* Match the content width of the posts list (Tailwind: max-w-5xl) */
+		max-width: 1024px;
+		margin: 0 auto;
+		/* Match the horizontal padding of the posts list (Tailwind: px-6) */
+		padding: 0 1.5rem;
+	}
+
+	.navbar-logo {
+		font-size: 1.25rem;
+		font-weight: 700;
+		letter-spacing: -0.025em;
+		color: white;
+		text-decoration: none;
+		transition: color 0.2s ease;
+		z-index: 50;
+		position: relative;
+	}
+
+	.navbar-logo:hover {
+		color: #d1d5db;
+	}
+
+	.navbar-links-desktop {
+		display: none;
+		gap: 1.5rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+	}
+
+	@media (min-width: 768px) {
+		.navbar-links-desktop {
+			display: flex;
+		}
+	}
+
+	.navbar-link {
+		color: #6b7280;
+		text-decoration: none;
+		transition: color 0.2s ease;
+	}
+
+	.navbar-link:hover {
+		color: white;
+	}
+
+	.navbar-menu-button {
+		display: block;
+		z-index: 50;
+		position: relative;
+		color: #d1d5db;
+		background: none;
+		border: none;
+		cursor: pointer;
+		padding: 0.5rem;
+		transition: color 0.2s ease;
+	}
+
+	.navbar-menu-button:hover {
+		color: white;
+	}
+
+	@media (min-width: 768px) {
+		.navbar-menu-button {
+			display: none;
+		}
+	}
+
+	.menu-icon {
+		display: none;
+		width: 24px;
+		height: 24px;
+	}
+
+	.menu-icon-open {
+		display: block;
+	}
+
+	.navbar[data-menu-open='true'] .menu-icon-open {
+		display: none;
+	}
+
+	.navbar[data-menu-open='true'] .menu-icon-close {
+		display: block;
+	}
+
+	.navbar-menu-mobile {
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 100%;
+		display: none;
+		flex-direction: column;
+		gap: 0.5rem;
+		margin: 0.5rem 1.5rem;
+		padding: 1rem;
+		border-radius: 4px;
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		background: rgba(5, 5, 5, 0.8);
+		backdrop-filter: blur(12px);
+		box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+			0 10px 10px -5px rgba(0, 0, 0, 0.04);
+		opacity: 0;
+		transform: translateY(-8px);
+		transition: all 0.2s ease;
+		pointer-events: none;
+	}
+
+	@media (min-width: 768px) {
+		.navbar-menu-mobile {
+			display: none !important;
+		}
+	}
+
+	.navbar[data-menu-open='true'] .navbar-menu-mobile {
+		display: flex;
+		opacity: 1;
+		transform: translateY(0);
+		pointer-events: auto;
+	}
+
+	.navbar-link-mobile {
+		border-radius: 8px;
+		padding: 0.75rem;
+		font-size: 1rem;
+		font-weight: 500;
+		color: #d1d5db;
+		text-decoration: none;
+		transition: all 0.2s ease;
+	}
+
+	.navbar-link-mobile:hover {
+		color: white;
+		background: rgba(255, 255, 255, 0.05);
+	}
+
+	.navbar-overlay {
+		position: fixed;
+		inset: 0;
+		z-index: 40;
+		background: rgba(0, 0, 0, 0.2);
+		backdrop-filter: blur(4px);
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 0.3s ease;
+	}
+
+	@media (min-width: 768px) {
+		.navbar-overlay {
+			display: none;
+		}
+	}
+
+	.navbar-overlay[data-visible='true'] {
+		opacity: 1;
+		pointer-events: auto;
+	}
+</style>
+
+<script>
+	// Mobile menu toggle functionality
+	const navbar = document.getElementById('navbar');
+	const menuButton = document.getElementById('mobile-menu-button');
+	const mobileMenu = document.getElementById('mobile-menu');
+	const overlay = document.getElementById('mobile-menu-overlay');
+
+	if (menuButton && mobileMenu && overlay) {
+		menuButton.addEventListener('click', () => {
+			const isOpen = navbar?.getAttribute('data-menu-open') === 'true';
+			navbar?.setAttribute('data-menu-open', String(!isOpen));
+			overlay.setAttribute('data-visible', String(!isOpen));
+		});
+
+		// Close menu when clicking overlay
+		overlay.addEventListener('click', () => {
+			navbar?.setAttribute('data-menu-open', 'false');
+			overlay.setAttribute('data-visible', 'false');
+		});
+
+		// Close menu when clicking a link
+		const mobileLinks = mobileMenu.querySelectorAll('.navbar-link-mobile');
+		mobileLinks.forEach((link) => {
+			link.addEventListener('click', () => {
+				navbar?.setAttribute('data-menu-open', 'false');
+				overlay.setAttribute('data-visible', 'false');
+			});
+		});
+	}
+
+	// Scroll-based visibility (simplified)
+	let lastScrollY = 0;
+	const handleScroll = () => {
+		const currentScrollY = window.scrollY;
+		const scrollDelta = currentScrollY - lastScrollY;
+
+		if (currentScrollY < 100) {
+			navbar?.setAttribute('data-nav-visible', 'true');
+		} else if (scrollDelta > 5) {
+			navbar?.setAttribute('data-nav-visible', 'false');
+		} else if (scrollDelta < -5) {
+			navbar?.setAttribute('data-nav-visible', 'true');
+		}
+
+		if (currentScrollY > 50) {
+			navbar?.classList.add('navbar-scrolled');
+		} else {
+			navbar?.classList.remove('navbar-scrolled');
+		}
+
+		lastScrollY = currentScrollY;
+	};
+
+	window.addEventListener('scroll', handleScroll);
+</script>

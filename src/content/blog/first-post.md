@@ -1,6 +1,8 @@
 ---
 title: 'First post'
 description: 'Lorem ipsum dolor sit amet'
+category: 'Technology'
+excerpt: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
 pubDate: 'Jul 08 2022'
 heroImage: '../../assets/blog-placeholder-3.jpg'
 ---

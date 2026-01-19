@@ -1,8 +1,17 @@
 ---
+// Homepage with post list (match tech-blog PostList.tsx)
+import { getCollection } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
+import Background from '../components/Background.astro';
 import Footer from '../components/Footer.astro';
-import Header from '../components/Header.astro';
+import NavBar from '../components/NavBar.astro';
+import SpotlightCard from '../components/SpotlightCard.astro';
+import FormattedDate from '../components/FormattedDate.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+
+const posts = (await getCollection('blog')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
 ---
 
 <!doctype html>
@@ -10,39 +19,48 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 	<head>
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
 	</head>
-	<body>
-		<Header />
-		<main>
-			<h1>🧑‍🚀 Hello, Astronaut!</h1>
-			<p>
-				Welcome to the official <a href="https://astro.build/">Astro</a> blog starter template. This template
-				serves as a lightweight, minimally-styled starting point for anyone looking to build a personal
-				website, blog, or portfolio with Astro.
-			</p>
-			<p>
-				This template comes with a few integrations already configured in your
-				<code>astro.config.mjs</code> file. You can customize your setup with
-				<a href="https://astro.build/integrations">Astro Integrations</a> to add tools like Tailwind,
-				React, or Vue to your project.
-			</p>
-			<p>Here are a few ideas on how to get started with the template:</p>
-			<ul>
-				<li>Edit this page in <code>src/pages/index.astro</code></li>
-				<li>Edit the site header items in <code>src/components/Header.astro</code></li>
-				<li>Add your name to the footer in <code>src/components/Footer.astro</code></li>
-				<li>Check out the included blog posts in <code>src/content/blog/</code></li>
-				<li>Customize the blog post page layout in <code>src/layouts/BlogPost.astro</code></li>
-			</ul>
-			<p>
-				Have fun! If you get stuck, remember to
-				<a href="https://docs.astro.build/">read the docs</a>
-				or <a href="https://astro.build/chat">join us on Discord</a> to ask questions.
-			</p>
-			<p>
-				Looking for a blog template with a bit more personality? Check out
-				<a href="https://github.com/Charca/astro-blog-template">astro-blog-template</a>
-				by <a href="https://twitter.com/Charca">Maxi Ferreira</a>.
-			</p>
+	<body class="min-h-screen overflow-x-hidden bg-[#050505] font-sans text-gray-300 selection:bg-white/20 selection:text-white">
+		<Background />
+		<NavBar />
+		<main class="relative z-10 mx-auto max-w-5xl px-6 pb-20 pt-32">
+			<div class="animate-fade-in">
+				<header class="mb-20 mt-10">
+					<h1 class="mb-6 text-5xl font-bold tracking-tighter text-white md:text-7xl">
+						Exploring the <br /> frontier of technology.
+					</h1>
+					<p class="max-w-xl text-lg leading-relaxed text-gray-400 md:ml-1">
+						{SITE_DESCRIPTION}
+					</p>
+				</header>
+
+				<div class="grid grid-cols-1 gap-6">
+					{posts.map((post) => (
+						<SpotlightCard href={`/blog/${post.id}/`} className="group p-6 md:p-8">
+							<div class="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+								<div class="flex-1">
+									<div class="mb-3 flex items-center gap-3 text-xs font-medium uppercase tracking-wider text-gray-500">
+										<span class="font-bold text-white">{post.data.category}</span>
+										<span>•</span>
+										<span>
+											<FormattedDate date={post.data.pubDate} />
+										</span>
+									</div>
+									<h2 class="mb-3 text-2xl font-semibold text-gray-100 transition-colors group-hover:text-white">
+										{post.data.title}
+									</h2>
+									<p class="mb-4 leading-relaxed text-gray-400 transition-colors group-hover:text-gray-300 md:max-w-3xl">
+										{post.data.excerpt}
+									</p>
+									<div class="flex items-center text-sm font-medium text-gray-400 transition-colors group-hover:text-white">
+										Read Article
+										<span class="ml-1 transition-transform group-hover:translate-x-1">›</span>
+									</div>
+								</div>
+							</div>
+						</SpotlightCard>
+					))}
+				</div>
+			</div>
 		</main>
 		<Footer />
 	</body>

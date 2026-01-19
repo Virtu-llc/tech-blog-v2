@@ -1,10 +1,12 @@
 ---
-import { Image } from 'astro:assets';
+// Blog list page with post cards (match tech-blog PostList.tsx)
 import { getCollection } from 'astro:content';
 import BaseHead from '../../components/BaseHead.astro';
+import Background from '../../components/Background.astro';
 import Footer from '../../components/Footer.astro';
 import FormattedDate from '../../components/FormattedDate.astro';
-import Header from '../../components/Header.astro';
+import NavBar from '../../components/NavBar.astro';
+import SpotlightCard from '../../components/SpotlightCard.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
 
 const posts = (await getCollection('blog')).sort(
@@ -15,99 +17,50 @@ const posts = (await getCollection('blog')).sort(
 <!doctype html>
 <html lang="en">
 	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-		<style>
-			main {
-				width: 960px;
-			}
-			ul {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 2rem;
-				list-style-type: none;
-				margin: 0;
-				padding: 0;
-			}
-			ul li {
-				width: calc(50% - 1rem);
-			}
-			ul li * {
-				text-decoration: none;
-				transition: 0.2s ease;
-			}
-			ul li:first-child {
-				width: 100%;
-				margin-bottom: 1rem;
-				text-align: center;
-			}
-			ul li:first-child img {
-				width: 100%;
-			}
-			ul li:first-child .title {
-				font-size: 2.369rem;
-			}
-			ul li img {
-				margin-bottom: 0.5rem;
-				border-radius: 12px;
-			}
-			ul li a {
-				display: block;
-			}
-			.title {
-				margin: 0;
-				color: rgb(var(--black));
-				line-height: 1;
-			}
-			.date {
-				margin: 0;
-				color: rgb(var(--gray));
-			}
-			ul li a:hover h4,
-			ul li a:hover .date {
-				color: rgb(var(--accent));
-			}
-			ul a:hover img {
-				box-shadow: var(--box-shadow);
-			}
-			@media (max-width: 720px) {
-				ul {
-					gap: 0.5em;
-				}
-				ul li {
-					width: 100%;
-					text-align: center;
-				}
-				ul li:first-child {
-					margin-bottom: 0;
-				}
-				ul li:first-child .title {
-					font-size: 1.563em;
-				}
-			}
-		</style>
+		<BaseHead title={`${SITE_TITLE} - Blog`} description={SITE_DESCRIPTION} />
 	</head>
-	<body>
-		<Header />
-		<main>
-			<section>
-				<ul>
-					{
-						posts.map((post) => (
-							<li>
-								<a href={`/blog/${post.id}/`}>
-									{post.data.heroImage && (
-										<Image width={720} height={360} src={post.data.heroImage} alt="" />
-									)}
-									<h4 class="title">{post.data.title}</h4>
-									<p class="date">
-										<FormattedDate date={post.data.pubDate} />
+	<body class="min-h-screen overflow-x-hidden bg-[#050505] font-sans text-gray-300 selection:bg-white/20 selection:text-white">
+		<Background />
+		<NavBar />
+		<main class="relative z-10 mx-auto max-w-5xl px-6 pb-20 pt-32">
+			<div class="animate-fade-in">
+				<header class="mb-20 mt-10">
+					<h1 class="mb-6 text-5xl font-bold tracking-tighter text-white md:text-7xl">
+						Exploring the <br /> frontier of technology.
+					</h1>
+					<p class="max-w-xl text-lg leading-relaxed text-gray-400 md:ml-1">
+						{SITE_DESCRIPTION}
+					</p>
+				</header>
+
+				<div class="grid grid-cols-1 gap-6">
+					{posts.map((post) => (
+						<SpotlightCard href={`/blog/${post.id}/`} className="group p-6 md:p-8">
+							<div class="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+								<div class="flex-1">
+									<div class="mb-3 flex items-center gap-3 text-xs font-medium uppercase tracking-wider text-gray-500">
+										<span class="font-bold text-white">{post.data.category}</span>
+										<span>•</span>
+										<span>
+											<FormattedDate date={post.data.pubDate} />
+										</span>
+									</div>
+									<h2 class="mb-3 text-2xl font-semibold text-gray-100 transition-colors group-hover:text-white">
+										{post.data.title}
+									</h2>
+									<p class="mb-4 leading-relaxed text-gray-400 transition-colors group-hover:text-gray-300 md:max-w-3xl">
+										{post.data.excerpt}
 									</p>
-								</a>
-							</li>
-						))
-					}
-				</ul>
-			</section>
+									<div class="flex items-center text-sm font-medium text-gray-400 transition-colors group-hover:text-white">
+										Read Article
+										<span class="ml-1 transition-transform group-hover:translate-x-1">›</span>
+									</div>
+								</div>
+							</div>
+						</SpotlightCard>
+					))}
+				</div>
+			</div>
 		</main>
 		<Footer />
 	</body>
