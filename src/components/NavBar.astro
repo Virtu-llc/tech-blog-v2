@@ -88,9 +88,18 @@ const NAV_LINKS = [
 		top: 0;
 		z-index: 50;
 		width: 100%;
-		transition: all 0.5s ease;
+		transition: none;
 		background: transparent;
 		padding: 1.5rem 0;
+		transform: translateY(0);
+	}
+
+	.navbar.navbar-initialized {
+		transition: transform 0.3s ease, background 0.5s ease, padding 0.5s ease;
+	}
+
+	.navbar[data-nav-visible='false'] {
+		transform: translateY(-100%);
 	}
 
 	.navbar-scrolled {
@@ -291,28 +300,38 @@ const NAV_LINKS = [
 		});
 	}
 
-	// Scroll-based visibility (simplified)
-	let lastScrollY = 0;
+	// Scroll-based visibility
+	let lastScrollY = window.scrollY || 0;
+	
 	const handleScroll = () => {
+		if (!navbar) return;
+		
 		const currentScrollY = window.scrollY;
 		const scrollDelta = currentScrollY - lastScrollY;
 
 		if (currentScrollY < 100) {
-			navbar?.setAttribute('data-nav-visible', 'true');
+			navbar.setAttribute('data-nav-visible', 'true');
 		} else if (scrollDelta > 5) {
-			navbar?.setAttribute('data-nav-visible', 'false');
+			navbar.setAttribute('data-nav-visible', 'false');
 		} else if (scrollDelta < -5) {
-			navbar?.setAttribute('data-nav-visible', 'true');
+			navbar.setAttribute('data-nav-visible', 'true');
 		}
 
 		if (currentScrollY > 50) {
-			navbar?.classList.add('navbar-scrolled');
+			navbar.classList.add('navbar-scrolled');
 		} else {
-			navbar?.classList.remove('navbar-scrolled');
+			navbar.classList.remove('navbar-scrolled');
 		}
 
 		lastScrollY = currentScrollY;
 	};
 
-	window.addEventListener('scroll', handleScroll);
+	if (navbar) {
+		handleScroll();
+		requestAnimationFrame(() => {
+			navbar.classList.add('navbar-initialized');
+		});
+	}
+
+	window.addEventListener('scroll', handleScroll, { passive: true });
 </script>
