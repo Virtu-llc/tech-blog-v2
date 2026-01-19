@@ -10,9 +10,18 @@
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.13",
+    "@astrojs/react": "^4.4.2",
     "@astrojs/rss": "^4.0.15",
     "@astrojs/sitemap": "^3.7.0",
+    "@tailwindcss/vite": "^4.1.18",
+    "@types/react": "^19.2.8",
+    "@types/react-dom": "^19.2.3",
     "astro": "^5.16.11",
-    "sharp": "^0.34.3"
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0",
+    "sharp": "^0.34.3",
+    "tailwindcss": "^4.1.18"
   }
 }
