@@ -23,6 +23,61 @@
 	<!-- Include the script that builds the page and powers Decap CMS -->
 	<script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
 	<script>
+		// Enable KaTeX math rendering inside Decap CMS preview iframe.
+		(function () {
+			if (!window.CMS) return;
+
+			// Inject KaTeX assets into the preview iframe (not the main window).
+			CMS.registerPreviewStyle("https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css");
+			CMS.registerPreviewScript("https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js");
+			CMS.registerPreviewScript("https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js");
+
+			var BlogPreview = createClass({
+				componentDidMount: function () {
+					this.renderMath();
+				},
+				componentDidUpdate: function () {
+					this.renderMath();
+				},
+				renderMath: function () {
+					var self = this;
+					var target = this._root || document.body;
+
+					function run() {
+						if (!window.renderMathInElement) return false;
+						window.renderMathInElement(target, {
+							delimiters: [
+								{ left: "$$", right: "$$", display: true },
+								{ left: "$", right: "$", display: false },
+								{ left: "\\(", right: "\\)", display: false },
+								{ left: "\\[", right: "\\]", display: true }
+							],
+							throwOnError: false
+						});
+						return true;
+					}
+
+					// KaTeX scripts load asynchronously in the iframe; retry briefly if needed.
+					if (!run()) {
+						setTimeout(function () { self.renderMath(); }, 50);
+					}
+				},
+				render: function () {
+					var entry = this.props.entry;
+					var body = this.props.widgetFor("body");
+
+					return h("div", { ref: (el) => (this._root = el) },
+						h("h1", {}, entry.getIn(["data", "title"]) || ""),
+						h("div", {}, body)
+					);
+				}
+			});
+
+			// Collection name is "blog" in config.yml.ts
+			CMS.registerPreviewTemplate("blog", BlogPreview);
+		})();
+	</script>
+	<script>
 		if (window.netlifyIdentity) {
 			window.netlifyIdentity.on("init", user => {
 				if (!user) {
