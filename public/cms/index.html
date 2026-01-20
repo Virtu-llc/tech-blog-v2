@@ -27,40 +27,98 @@
 		(function () {
 			if (!window.CMS) return;
 
-			// Inject KaTeX assets into the preview iframe (not the main window).
-			CMS.registerPreviewStyle("https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css");
-			CMS.registerPreviewScript("https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js");
-			CMS.registerPreviewScript("https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js");
+			// Decap CMS doesn't expose registerPreviewScript in this build,
+			// so we inject KaTeX assets directly into the preview iframe.
+			var KATEX_CSS = "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css";
+			var KATEX_JS = "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js";
+			var KATEX_AUTORENDER_JS = "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js";
+
+			function ensureInIframe(iframe) {
+				if (!iframe || !iframe.contentDocument) return false;
+				var doc = iframe.contentDocument;
+				var head = doc.head || doc.getElementsByTagName("head")[0];
+				if (!head) return false;
+
+				function ensureLink(id, href) {
+					if (doc.getElementById(id)) return;
+					var link = doc.createElement("link");
+					link.id = id;
+					link.rel = "stylesheet";
+					link.href = href;
+					head.appendChild(link);
+				}
+
+				function ensureScript(id, src) {
+					if (doc.getElementById(id)) return;
+					var s = doc.createElement("script");
+					s.id = id;
+					s.src = src;
+					s.defer = true;
+					head.appendChild(s);
+				}
+
+				ensureLink("katex-css", KATEX_CSS);
+				ensureScript("katex-js", KATEX_JS);
+				ensureScript("katex-auto-render-js", KATEX_AUTORENDER_JS);
+
+				// Add a small hook script inside the iframe to auto-render math on updates.
+				if (!doc.getElementById("katex-hook")) {
+					var hook = doc.createElement("script");
+					hook.id = "katex-hook";
+					hook.textContent = [
+						"(function(){",
+						"  function render(){",
+						"    if (!window.renderMathInElement) return false;",
+						"    try {",
+						"      window.renderMathInElement(document.body, {",
+						"        delimiters: [",
+						"          { left: '$$', right: '$$', display: true },",
+						"          { left: '$', right: '$', display: false },",
+						"          { left: '\\\\(', right: '\\\\)', display: false },",
+						"          { left: '\\\\[', right: '\\\\]', display: true }",
+						"        ],",
+						"        throwOnError: false",
+						"      });",
+						"    } catch (e) {}",
+						"    return true;",
+						"  }",
+						"  function tick(){",
+						"    if (!render()) return setTimeout(tick, 50);",
+						"    var obs = new MutationObserver(function(){ render(); });",
+						"    obs.observe(document.body, { childList: true, subtree: true });",
+						"  }",
+						"  if (document.readyState === 'loading') {",
+						"    document.addEventListener('DOMContentLoaded', tick);",
+						"  } else {",
+						"    tick();",
+						"  }",
+						"})();"
+					].join("\n");
+					head.appendChild(hook);
+				}
+
+				return true;
+			}
+
+			// Try to find/inject into preview iframe, and keep watching for it.
+			function tryInject() {
+				var iframes = document.getElementsByTagName("iframe");
+				for (var i = 0; i < iframes.length; i++) {
+					try {
+						if (ensureInIframe(iframes[i])) return true;
+					} catch (_) {
+						// Ignore cross-origin/access errors (shouldn't happen on same origin).
+					}
+				}
+				return false;
+			}
 
 			var BlogPreview = createClass({
 				componentDidMount: function () {
-					this.renderMath();
+					tryInject();
 				},
 				componentDidUpdate: function () {
-					this.renderMath();
-				},
-				renderMath: function () {
-					var self = this;
-					var target = this._root || document.body;
-
-					function run() {
-						if (!window.renderMathInElement) return false;
-						window.renderMathInElement(target, {
-							delimiters: [
-								{ left: "$$", right: "$$", display: true },
-								{ left: "$", right: "$", display: false },
-								{ left: "\\(", right: "\\)", display: false },
-								{ left: "\\[", right: "\\]", display: true }
-							],
-							throwOnError: false
-						});
-						return true;
-					}
-
-					// KaTeX scripts load asynchronously in the iframe; retry briefly if needed.
-					if (!run()) {
-						setTimeout(function () { self.renderMath(); }, 50);
-					}
+					tryInject();
 				},
 				render: function () {
 					var entry = this.props.entry;
@@ -75,6 +133,17 @@
 
 			// Collection name is "blog" in config.yml.ts
 			CMS.registerPreviewTemplate("blog", BlogPreview);
+
+			// Observe DOM for iframe creation (preview pane mounts lazily).
+			var obs = new MutationObserver(function () {
+				if (tryInject()) {
+					// Once injected, no need to keep observing.
+					obs.disconnect();
+				}
+			});
+			obs.observe(document.body, { childList: true, subtree: true });
+			// And try immediately.
+			tryInject();
 		})();
 	</script>
 	<script>
