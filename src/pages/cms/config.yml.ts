@@ -37,8 +37,7 @@ collections:
     fields:
       - { label: "Name", name: "name", widget: "string", required: true }
       - { label: "Avatar Image", name: "avatarImage", widget: "image", required: false }
-      - { label: "Avatar URL", name: "avatarUrl", widget: "string", required: false }
-      - { label: "Website", name: "website", widget: "string", required: false }
+      - { label: "Website", name: "website", widget: "string", required: false, pattern: ["^https://", "Must start with https://"] }
       - { label: "Body", name: "body", widget: "markdown", required: false }
   - name: blog
     label: Blog Posts
@@ -78,6 +77,17 @@ collections:
           hint: "Relative path, e.g.: ../../assets/blog-placeholder-1.jpg or /uploads/image.jpg"
         }
       - {
+          label: "Author (pick from Authors)",
+          name: "authorId",
+          widget: "relation",
+          collection: "authors",
+          search_fields: ["name"],
+          display_fields: ["name"],
+          value_field: "{{slug}}",
+          multiple: false,
+          required: false
+        }
+      - {
           label: "Author",
           name: "author",
           widget: "object",
@@ -89,22 +99,10 @@ collections:
               name: "avatarImage",
               widget: "image",
               required: false,
-              hint: "Upload an image, or leave empty and use Avatar URL instead."
+              hint: "Upload an image (or paste an image URL if your media library allows it)."
             },
-            { label: "Avatar URL", name: "avatarUrl", widget: "string", required: false },
-            { label: "Website", name: "website", widget: "string", required: false }
+            { label: "Website", name: "website", widget: "string", required: false, pattern: ["^https://", "Must start with https://"] }
           ]
-        }
-      - {
-          label: "Author (pick from Authors)",
-          name: "authorId",
-          widget: "relation",
-          collection: "authors",
-          search_fields: ["name"],
-          display_fields: ["name"],
-          value_field: "{{slug}}",
-          multiple: false,
-          required: false
         }
       - { label: "Body", name: "body", widget: "markdown", required: true }
 `;

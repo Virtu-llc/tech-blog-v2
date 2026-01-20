@@ -1,6 +1,17 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
+const httpsUrl = z.preprocess(
+	(val) => {
+		if (typeof val === 'string') {
+			const trimmed = val.trim();
+			return trimmed === '' ? undefined : trimmed;
+		}
+		return val;
+	},
+	z.string().url().startsWith('https://').optional(),
+);
+
 const authors = defineCollection({
 	loader: glob({ base: './src/content/authors', pattern: '**/*.{md,mdx}' }),
 	schema: ({ image }) =>
@@ -8,7 +19,7 @@ const authors = defineCollection({
 			name: z.string(),
 			avatarImage: z.string().optional(),
 			avatarUrl: z.string().optional(),
-			website: z.string().optional(),
+			website: httpsUrl,
 		}),
 });
 
@@ -35,7 +46,7 @@ const blog = defineCollection({
 					name: z.string().optional(),
 					avatarImage: z.string().optional(),
 					avatarUrl: z.string().optional(),
-					website: z.string().optional(),
+					website: httpsUrl,
 				})
 				.optional(),
 		}),
