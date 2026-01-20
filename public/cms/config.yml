@@ -8,6 +8,7 @@ backend:
   repo: Virtu-llc/tech-blog-v2 # GitHub repository owner/repo
   branch: main
   base_url: https://tech.currents.one # OAuth Provider base URL
+  auth_endpoint: /api/auth/github
 
 # Media files configuration
 media_folder: public/uploads # Uploaded images storage location
