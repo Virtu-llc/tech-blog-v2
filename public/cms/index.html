@@ -5,6 +5,19 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>Content Manager</title>
 	<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+	<!--
+		Decap CMS loads config from "config.yml" by default and GitHub Pages caches it.
+		We inject a cache-busting version param to always fetch the latest config.
+	-->
+	<script>
+		(function () {
+			var link = document.createElement("link");
+			link.rel = "cms-config-url";
+			link.type = "text/yaml";
+			link.href = "/cms/config.yml?v=" + Date.now();
+			document.head.appendChild(link);
+		})();
+	</script>
 </head>
 <body>
 	<!-- Include the script that builds the page and powers Decap CMS -->
