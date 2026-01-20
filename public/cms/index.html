@@ -32,6 +32,8 @@
 			var KATEX_CSS = "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css";
 			var KATEX_JS = "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js";
 			var KATEX_AUTORENDER_JS = "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js";
+			var PRISM_CSS = "https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css";
+			var PRISM_JS = "https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js";
 
 			function ensureInIframe(iframe) {
 				if (!iframe || !iframe.contentDocument) return false;
@@ -57,9 +59,27 @@
 					head.appendChild(s);
 				}
 
+				// Minimal code block styles (preserve indentation + readable).
+				if (!doc.getElementById("preview-code-style")) {
+					var style = doc.createElement("style");
+					style.id = "preview-code-style";
+					style.textContent = [
+						"pre, code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; }",
+						"pre { white-space: pre; overflow-x: auto; padding: 12px 14px; border-radius: 10px; background: #1f2937; color: #e5e7eb; }",
+						"pre code { white-space: pre; }",
+						"code { background: rgba(0,0,0,0.05); padding: 0.15em 0.3em; border-radius: 0.25em; }",
+						"pre code { background: transparent; padding: 0; }"
+					].join("\n");
+					head.appendChild(style);
+				}
+
 				ensureLink("katex-css", KATEX_CSS);
 				ensureScript("katex-js", KATEX_JS);
 				ensureScript("katex-auto-render-js", KATEX_AUTORENDER_JS);
+
+				// Prism for code highlighting in preview.
+				ensureLink("prism-css", PRISM_CSS);
+				ensureScript("prism-js", PRISM_JS);
 
 				// Add a small hook script inside the iframe to auto-render math on updates.
 				if (!doc.getElementById("katex-hook")) {
@@ -67,7 +87,7 @@
 					hook.id = "katex-hook";
 					hook.textContent = [
 						"(function(){",
-						"  function render(){",
+						"  function renderMath(){",
 						"    if (!window.renderMathInElement) return false;",
 						"    try {",
 						"      window.renderMathInElement(document.body, {",
@@ -82,9 +102,19 @@
 						"    } catch (e) {}",
 						"    return true;",
 						"  }",
+						"  function renderCode(){",
+						"    if (!window.Prism || !window.Prism.highlightAllUnder) return false;",
+						"    try { window.Prism.highlightAllUnder(document.body); } catch (e) {}",
+						"    return true;",
+						"  }",
+						"  function renderAll(){",
+						"    var okMath = renderMath();",
+						"    var okCode = renderCode();",
+						"    return okMath || okCode;",
+						"  }",
 						"  function tick(){",
-						"    if (!render()) return setTimeout(tick, 50);",
-						"    var obs = new MutationObserver(function(){ render(); });",
+						"    if (!renderAll()) return setTimeout(tick, 50);",
+						"    var obs = new MutationObserver(function(){ renderAll(); });",
 						"    obs.observe(document.body, { childList: true, subtree: true });",
 						"  }",
 						"  if (document.readyState === 'loading') {",
