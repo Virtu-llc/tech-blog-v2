@@ -27,6 +27,19 @@ public_folder: /uploads
 
 # Content collections configuration
 collections:
+  - name: authors
+    label: Authors
+    folder: src/content/authors
+    create: true
+    slug: "{{slug}}"
+    extension: md
+    format: frontmatter
+    fields:
+      - { label: "Name", name: "name", widget: "string", required: true }
+      - { label: "Avatar Image", name: "avatarImage", widget: "image", required: false }
+      - { label: "Avatar URL", name: "avatarUrl", widget: "string", required: false }
+      - { label: "Website", name: "website", widget: "string", required: false }
+      - { label: "Body", name: "body", widget: "markdown", required: false }
   - name: blog
     label: Blog Posts
     folder: src/content/blog
@@ -71,9 +84,27 @@ collections:
           required: false,
           fields: [
             { label: "Name", name: "name", widget: "string", required: false },
+            {
+              label: "Avatar Image",
+              name: "avatarImage",
+              widget: "image",
+              required: false,
+              hint: "Upload an image, or leave empty and use Avatar URL instead."
+            },
             { label: "Avatar URL", name: "avatarUrl", widget: "string", required: false },
             { label: "Website", name: "website", widget: "string", required: false }
           ]
+        }
+      - {
+          label: "Author (pick from Authors)",
+          name: "authorId",
+          widget: "relation",
+          collection: "authors",
+          search_fields: ["name"],
+          display_fields: ["name"],
+          value_field: "{{slug}}",
+          multiple: false,
+          required: false
         }
       - { label: "Body", name: "body", widget: "markdown", required: true }
 `;

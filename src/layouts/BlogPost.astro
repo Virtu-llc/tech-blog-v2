@@ -1,7 +1,7 @@
 ---
 // Blog post layout with dark theme
 import { Image } from 'astro:assets';
-import type { CollectionEntry } from 'astro:content';
+import { getEntry, type CollectionEntry } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
 import Background from '../components/Background.astro';
 import Footer from '../components/Footer.astro';
@@ -14,12 +14,18 @@ type Props = CollectionEntry<'blog'>['data'] & {
 const { title, description, pubDate, updatedDate, heroImage, category, author } =
 	Astro.props;
 const { slug } = Astro.props;
+const { authorId } = Astro.props;
 
 // Configure the external views API base (e.g. https://your-app.vercel.app).
 // For GitHub Pages, this MUST be set to your deployed API origin.
 const viewsApiBase = (import.meta.env.PUBLIC_API_BASE ?? '').replace(/\/+$/, '');
 
-const hasAuthorInfo = Boolean(author && (author.name || author.avatarUrl || author.website));
+const linkedAuthorEntry = authorId ? await getEntry('authors', authorId).catch(() => null) : null;
+const resolvedAuthor = linkedAuthorEntry?.data ?? author;
+const avatarSrc = resolvedAuthor?.avatarImage || resolvedAuthor?.avatarUrl;
+const hasAuthorInfo = Boolean(
+	resolvedAuthor && (resolvedAuthor.name || avatarSrc || resolvedAuthor.website),
+);
 ---
 
 <html lang="en">
@@ -61,27 +67,27 @@ const hasAuthorInfo = Boolean(author && (author.name || author.avatarUrl || auth
 					<div class="post-meta-info">
 						{hasAuthorInfo && (
 							<div class="post-author">
-								{author?.avatarUrl && (
+								{avatarSrc && (
 									<img
-										src={author.avatarUrl}
-										alt={author.name ? `${author.name} avatar` : 'Author avatar'}
+										src={avatarSrc}
+										alt={resolvedAuthor?.name ? `${resolvedAuthor.name} avatar` : 'Author avatar'}
 										class="author-avatar"
 										width="24"
 										height="24"
 									/>
 								)}
-								{author?.name && (
-									author.website ? (
+								{resolvedAuthor?.name && (
+									resolvedAuthor.website ? (
 										<a
-											href={author.website}
+											href={resolvedAuthor.website}
 											target="_blank"
 											rel="noreferrer"
 											class="author-name-link"
 										>
-											{author.name}
+											{resolvedAuthor.name}
 										</a>
 									) : (
-										<span class="author-name">{author.name}</span>
+										<span class="author-name">{resolvedAuthor.name}</span>
 									)
 								)}
 							</div>
