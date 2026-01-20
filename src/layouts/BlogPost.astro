@@ -7,10 +7,17 @@ import Background from '../components/Background.astro';
 import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import NavBar from '../components/NavBar.astro';
-type Props = CollectionEntry<'blog'>['data'];
+type Props = CollectionEntry<'blog'>['data'] & {
+	slug: string;
+};
 
 const { title, description, pubDate, updatedDate, heroImage, category, author } =
 	Astro.props;
+const { slug } = Astro.props;
+
+// Configure the external views API base (e.g. https://your-app.vercel.app).
+// For GitHub Pages, this MUST be set to your deployed API origin.
+const viewsApiBase = (import.meta.env.PUBLIC_API_BASE ?? '').replace(/\/+$/, '');
 
 const hasAuthorInfo = Boolean(author && (author.name || author.avatarUrl || author.website));
 ---
@@ -107,6 +114,20 @@ const hasAuthorInfo = Boolean(author && (author.name || author.avatarUrl || auth
 									<path d="M8 4v4l3 2" />
 								</svg>
 								<span id="reading-time-text">—</span> min read
+							</span>
+							<span class="meta-item" id="post-views" aria-label="Views">
+								<svg
+									width="14"
+									height="14"
+									viewBox="0 0 16 16"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2"
+								>
+									<path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5Z" />
+									<circle cx="8" cy="8" r="2" />
+								</svg>
+								<span id="post-views-text">—</span>
 							</span>
 						</div>
 					</div>
@@ -339,7 +360,7 @@ const hasAuthorInfo = Boolean(author && (author.name || author.avatarUrl || auth
 	}
 </style>
 
-<script>
+<script define:vars={{ slug, viewsApiBase }}>
 	// Calculate reading time from article content
 	function calculateReadingTime() {
 		const content = document.querySelector('.post-content');
@@ -361,6 +382,70 @@ const hasAuthorInfo = Boolean(author && (author.name || author.avatarUrl || auth
 		document.addEventListener('DOMContentLoaded', calculateReadingTime);
 	} else {
 		calculateReadingTime();
+	}
+
+	// Views counter
+	function getViewsEndpoint() {
+		const base = (typeof viewsApiBase === 'string' ? viewsApiBase : '').trim();
+		// If API is not set, this falls back to same-origin.
+		return `${base}/api/views/${encodeURIComponent(slug)}`;
+	}
+
+	function coerceViews(data) {
+		const raw = data?.views ?? data?.count ?? data?.result;
+		if (typeof raw === 'number' && Number.isFinite(raw)) return raw;
+		if (typeof raw === 'string' && raw.trim() !== '' && Number.isFinite(Number(raw))) {
+			return Number(raw);
+		}
+		return null;
+	}
+
+	async function loadViews() {
+		const text = document.getElementById('post-views-text');
+		if (!text) return;
+
+		try {
+			const res = await fetch(getViewsEndpoint(), { method: 'GET', mode: 'cors' });
+			if (!res.ok) return;
+			const data = await res.json();
+			const views = coerceViews(data);
+			if (views !== null) text.textContent = String(views);
+		} catch {
+			console.warn('[views] failed to load views. Check CORS and API base:', getViewsEndpoint());
+		}
+	}
+
+	async function bumpViewsOncePerDay() {
+		try {
+			const today = new Date().toISOString().slice(0, 10);
+			const dedupeKey = `views:${slug}:${today}`;
+			if (typeof localStorage === 'undefined') return;
+			if (localStorage.getItem(dedupeKey)) return;
+			localStorage.setItem(dedupeKey, '1');
+
+			const res = await fetch(getViewsEndpoint(), {
+				method: 'POST',
+				mode: 'cors',
+				keepalive: true,
+			});
+			if (!res.ok) return;
+			const data = await res.json().catch(() => null);
+			const text = document.getElementById('post-views-text');
+			const views = coerceViews(data);
+			if (text && views !== null) text.textContent = String(views);
+		} catch {
+			console.warn('[views] failed to bump views. Check CORS and API base:', getViewsEndpoint());
+		}
+	}
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', () => {
+			loadViews();
+			bumpViewsOncePerDay();
+		});
+	} else {
+		loadViews();
+		bumpViewsOncePerDay();
 	}
 
 	// Share functionality
