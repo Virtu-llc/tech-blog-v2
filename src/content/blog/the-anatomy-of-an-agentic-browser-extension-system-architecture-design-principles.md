@@ -33,9 +33,9 @@ Console (control plane).
 The browser is the operating system for modern work. It hosts authenticated sessions, rich user interfaces, and domain-specific workflows. However, for an automated agent, the browser represents a hostile execution environment characterized by dynamic DOM structures, rate limits, and ephemeral states.
 This inherent tension necessitates a strict architectural decoupling:
 
-1. The Browser Extension acts as the edge runtime. It is the specific component capable of interacting with web pages in the same context as the user, bypassing the need for brittle server-side rendering or headless browsers.
-2. The Backend acts as the centralized brain. It provides the durability required to run agent loops, enforce policies, and manage costs—tasks that are computationally and securely infeasible to perform entirely client-side.
-3. The Web Console acts as the administrative surface. It abstracts complexity away from the extension review process, allowing for rapid iteration on configuration, playbooks, and business logic.
+* The Browser Extension acts as the edge runtime. It is the specific component capable of interacting with web pages in the same context as the user, bypassing the need for brittle server-side rendering or headless browsers.
+* The Backend acts as the centralized brain. It provides the durability required to run agent loops, enforce policies, and manage costs—tasks that are computationally and securely infeasible to perform entirely client-side.
+* The Web Console acts as the administrative surface. It abstracts complexity away from the extension review process, allowing for rapid iteration on configuration, playbooks, and business logic.
 
 ## Architecture at a Glance
 
