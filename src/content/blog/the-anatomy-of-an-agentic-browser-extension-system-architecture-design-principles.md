@@ -33,17 +33,17 @@ Console (control plane).
 The browser is the operating system for modern work. It hosts authenticated sessions, rich user interfaces, and domain-specific workflows. However, for an automated agent, the browser represents a hostile execution environment characterized by dynamic DOM structures, rate limits, and ephemeral states.
 This inherent tension necessitates a strict architectural decoupling:
 
-* The Browser Extension acts as the edge runtime. It is the specific component capable of interacting with web pages in the same context as the user, bypassing the need for brittle server-side rendering or headless browsers.
-* The Backend acts as the centralized brain. It provides the durability required to run agent loops, enforce policies, and manage costs—tasks that are computationally and securely infeasible to perform entirely client-side.
-* The Web Console acts as the administrative surface. It abstracts complexity away from the extension review process, allowing for rapid iteration on configuration, playbooks, and business logic.
+- The Browser Extension acts as the edge runtime. It is the specific component capable of interacting with web pages in the same context as the user, bypassing the need for brittle server-side rendering or headless browsers.
+- The Backend acts as the centralized brain. It provides the durability required to run agent loops, enforce policies, and manage costs—tasks that are computationally and securely infeasible to perform entirely client-side.
+- The Web Console acts as the administrative surface. It abstracts complexity away from the extension review process, allowing for rapid iteration on configuration, playbooks, and business logic.
 
 ## Architecture at a Glance
 
 To manage system complexity, we can visualize the architecture as three interacting planes. Each plane abstracts a specific set of responsibilities to ensure scalability and maintainability.
 
-* Data Plane (Execution): Comprises the content scripts and tool adapters that physically interact with the target webpage (click, type, scroll, read).
-* Control Plane (Configuration): Manages the user lifecycle, playbook definitions, system settings, and subscription entitlements.
-* Orchestration Plane (Decision & State): Hosts the agent runtime loop, maintains conversational memory, and aggregates observability data (logs/traces).
+- Data Plane (Execution): Comprises the content scripts and tool adapters that physically interact with the target webpage (click, type, scroll, read).
+- Control Plane (Configuration): Manages the user lifecycle, playbook definitions, system settings, and subscription entitlements.
+- Orchestration Plane (Decision & State): Hosts the agent runtime loop, maintains conversational memory, and aggregates observability data (logs/traces).
 
 ![](/uploads/screenshot-2026-01-20-at-7.13.49 pm.png)
 
@@ -69,18 +69,18 @@ An agent run differs significantly from a standard API request. It is a persiste
 
 The extension operates as the "hands" of the system. Architecturally, it is designed with three isolated layers to ensure security and performance:
 
-* UI Layer (Sidepanel): Captures user intent and renders the streaming state. It allows for immediate "human-in-the-loop" interruption.
-* Background Layer (Service Worker): Handles persistent connections, task queuing, and session management.
-* Execution Layer (Content Scripts): Responsible for parsing the Accessibility Tree, executing DOM interactions, and capturing evidence.
+- UI Layer (Sidepanel): Captures user intent and renders the streaming state. It allows for immediate "human-in-the-loop" interruption.
+- Background Layer (Service Worker): Handles persistent connections, task queuing, and session management.
+- Execution Layer (Content Scripts): Responsible for parsing the Accessibility Tree, executing DOM interactions, and capturing evidence.
   Crucially, the extension owns the Permission Boundary. It must explicitly decide when and where to act (e.g., restricted to the active tab) and is responsible for capturing structured execution evidence rather than simple boolean success flags.
 
 ### 2. The Backend: Deterministic Orchestration
 
 The backend transforms probabilistic model outputs into a reliable product. Its primary role is to enforce determinism of control flow.
 
-* Agent Runtime: Manages the planner loop, tool routing, and retry logic.
-* Session State: Maintains context windows and summarizes history to manage token limits.
-* Playbooks: Stores versioned, structured workflows that guide the agent's decision-making.
+- Agent Runtime: Manages the planner loop, tool routing, and retry logic.
+- Session State: Maintains context windows and summarizes history to manage token limits.
+- Playbooks: Stores versioned, structured workflows that guide the agent's decision-making.
   A simplified conceptual representation of the agent loop is as follows:
 
 ```python
@@ -106,16 +106,23 @@ while not run.is_done():
             emit("run_complete", summary=step.final)
             break
 ```
+
 ### 3. The Web Console: Operational Governance
+
 While the extension handles execution, the Web Console manages governance. It serves as the hub for Onboarding (device linking), Configuration (playbook management, safe domain allow-listing), and Commercial logic (subscriptions and usage limits). This separation allows business logic to evolve independently of the extension's release cycle.
+
 ## Cross-Cutting Design Principles
+
 Reliability in distributed agentic systems is not accidental; it is the result of architectural discipline. To bridge the gap between stochastic models and deterministic browsers, we adhere to six core principles.
 
 ### 1. The Principle of Least Privilege
+
 Since the extension acts as a proxy for the user's authenticated session, it effectively operates with "hands on the keyboard." To mitigate security risks, we strictly scope host permissions to the active tab and gate sensitive actions behind explicit "human-in-the-loop" confirmation. The agent should never possess more authority than is immediately necessary for the current task.
 
 ### 2. Contract-First Messaging
+
 Distributed systems degrade quickly when communication relies on ad-hoc message strings. To ensure stability, we enforce Contract-First Messaging. By defining a strict, versioned event schema, we guarantee forward and backward compatibility between the extension client and the cloud backend, preventing "silent failures" caused by schema drift.
+
 ```typescript
 type EventEnvelope<T> = {
   v: 1
@@ -125,21 +132,25 @@ type EventEnvelope<T> = {
   ts: number
   payload: T
 }
-
 ```
+
 ### 3. Streaming-First User Experience
+
 In an agentic context, latency is inevitable. To build and maintain user trust, the system must never appear static. We prioritize a Streaming-First UX, where the backend emits granular state updates—planning, locating elements, clicking—in real-time. This provides the user with immediate visibility into the agent's "thought process" rather than forcing them to wait for a final, opaque response.
 
 ### 4. Interruptibility and Idempotency
+
 Real-world web environments are non-deterministic, and user intent often shifts mid-task. The architecture handles this chaos through Interruptibility (via immediate cancellation tokens) and Idempotency. Tools are designed to be safe on retry—for example, preferring an explicit "Ensure Checkbox is Checked" action over a relative "Toggle Checkbox" action—allowing the agent to recover gracefully from network blips or DOM shifts.
 
 ### 5. Evidence-Based Execution
+
 To mitigate the risk of model hallucination in a functional environment, the system enforces Evidence-Based Execution. The agent is not permitted to assume an action was successful based solely on its own output. Instead, tools must return concrete artifacts—such as HTML snapshots, extracted text, or URL verifications—which serve as the ground truth for subsequent reasoning steps.
 
 ### 6. Observability by Design
+
 Debugging non-deterministic agents requires deep introspection. We achieve Observability by Design by tagging every interaction with unique runId and requestId identifiers. This allows us to trace a specific failure from the frontend UI state, through the backend orchestration logic, down to the specific DOM execution event in a single, coherent log.
+
 ## Conclusion
+
 Building an agentic browser extension is an exercise in system design, not just prompt engineering. By architecting a clean separation between the execution runtime (Extension), the orchestration brain (Backend), and the management layer (Console), we can create systems that are robust, secure, and capable of performing real-world work.
 The future of agents lies not just in smarter models, but in better architectures that can harness those models safely and effectively.
-
-
