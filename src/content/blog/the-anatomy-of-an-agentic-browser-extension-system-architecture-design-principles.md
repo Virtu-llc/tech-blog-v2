@@ -1,5 +1,5 @@
 ---
-title: "The Anatomy of an Agentic Browser Extension: System Architecture &
+title: "The Anatomy of an Agentic Browser Extension: System Architecture and
   Design Principles"
 description: An architectural blueprint for converting LLMs into functional
   browser agents. This post explores the distributed system design required to
@@ -156,7 +156,47 @@ The backend transforms probabilistic model outputs into a reliable product. Its 
 - Session State: Maintains context windows and summarizes history to manage token limits.
 - Playbooks: Stores versioned, structured workflows that guide the agent's decision-making.
 
-[![](https://mermaid.ink/img/pako:eNplVdFu2zYU_RWCQJ7qbHYMJ5kRuJBluTUqR4Ykr-3kwGAtxhYqiQZJpfEcA3soOmALUGDYhm3YgG0fsO1t7VAg_zLEWfa0Xxh5FVtOY1uGSN57zrmHV9Qcj1hIcR0fx-zFaEK4RH5rkCLk-YbrB31BOepSIciYHqHt7QZqd1zPn7cjLlRkxtP7Cx2tL1jRMWdPqThD1hPfNUw_sE4lJyOJHjASHzzjHzZ6hAuKDsZq3ECSjI9uJx-yM2Q7RiuwGQmRyVJJTyUyh_JoRXSDDHJM1zJ8KzA5JZJuRJeBSnMgQWUJ0WQqZ0hkSUJ4RAVgaZYc5KFlPho2-60Hlj_32XOaomYWjqlEzqOivpwKEpr9jt0KmlkUh8ibCUkT1EmF5NlIRiwF8E3MdV3WYdtxTSuw0mPGR_SGBaS6NGEnFLE4pMrZ20LvYIHBIAL8yFELZSvFMMh3zbFbQ4CZexOWKdltxXQfmBu18haSumqBGEeNnXJBD8UXyQU5zHUOPT8wwhzsjgPvpen6TcO2h12nZdmBSeIY2Xa3CNVo-Xaso9bWr2cgoGe4nhXkfdRV7Rsjl4opSwUFNFiGwJtOGZr-k3UfHozyJil6b6OndCRkPjS8oVY1h9KmnAqayrwXVkuFGUavZz-FucCYTuMZ-AHedikfU5REI87Q36--QglRd0d3ULQ3_V5LtdfQVn_K1f401A1tqz_VDh2lWItfWauvghQEG33fGXY7pusERibZ9oglWrXQ2k8ilgnQE-d4IAVE5Ts9A9QCAhBvCVqx3ppcO-U7jj1vZykoRHprReGVXiy8emx0fJgKHpNIIvUcqN5jMVJas1iKdXlbW-jyzZf__vTr9cX3l28-u_7l_Oq73y8vfrv6-u31xef__PBy-eMfV9--_e_d-fKLny__erV8fb58983y9Z9ogNX3fW7tsGd8bAUD7JGTzZNiLu9VFgO8Jl4L3DTBaXqrLWHP1Jl4QnSlYOmLSE7yEpTPIU1HeRMWiYCjuVcM-h4mXcvvu4eBS6U6SBUG0sftjRBcwmMehbiunilawgnlCdFDPId1LCc0oQNcV7ch4c91yQuVMyXpJ4wlqzTOsvEE149JLNQogwpaERlzkqxnOU1Dyk2WpRLXK7UagOD6HJ_i-nb5g7L6VPb2dvb3K9X9vZ2Pdqu7td0SnuF6vlauqF-1XKvs71Z3KpVqdVHCn4KENIvjEqZhJBnv5m8ZeNks_gfeeR8x?type=png)](https://mermaid.live/edit#pako:eNplVdFu2zYU_RWCQJ7qbHYMJ5kRuJBluTUqR4Ykr-3kwGAtxhYqiQZJpfEcA3soOmALUGDYhm3YgG0fsO1t7VAg_zLEWfa0Xxh5FVtOY1uGSN57zrmHV9Qcj1hIcR0fx-zFaEK4RH5rkCLk-YbrB31BOepSIciYHqHt7QZqd1zPn7cjLlRkxtP7Cx2tL1jRMWdPqThD1hPfNUw_sE4lJyOJHjASHzzjHzZ6hAuKDsZq3ECSjI9uJx-yM2Q7RiuwGQmRyVJJTyUyh_JoRXSDDHJM1zJ8KzA5JZJuRJeBSnMgQWUJ0WQqZ0hkSUJ4RAVgaZYc5KFlPho2-60Hlj_32XOaomYWjqlEzqOivpwKEpr9jt0KmlkUh8ibCUkT1EmF5NlIRiwF8E3MdV3WYdtxTSuw0mPGR_SGBaS6NGEnFLE4pMrZ20LvYIHBIAL8yFELZSvFMMh3zbFbQ4CZexOWKdltxXQfmBu18haSumqBGEeNnXJBD8UXyQU5zHUOPT8wwhzsjgPvpen6TcO2h12nZdmBSeIY2Xa3CNVo-Xaso9bWr2cgoGe4nhXkfdRV7Rsjl4opSwUFNFiGwJtOGZr-k3UfHozyJil6b6OndCRkPjS8oVY1h9KmnAqayrwXVkuFGUavZz-FucCYTuMZ-AHedikfU5REI87Q36--QglRd0d3ULQ3_V5LtdfQVn_K1f401A1tqz_VDh2lWItfWauvghQEG33fGXY7pusERibZ9oglWrXQ2k8ilgnQE-d4IAVE5Ts9A9QCAhBvCVqx3ppcO-U7jj1vZykoRHprReGVXiy8emx0fJgKHpNIIvUcqN5jMVJas1iKdXlbW-jyzZf__vTr9cX3l28-u_7l_Oq73y8vfrv6-u31xef__PBy-eMfV9--_e_d-fKLny__erV8fb58983y9Z9ogNX3fW7tsGd8bAUD7JGTzZNiLu9VFgO8Jl4L3DTBaXqrLWHP1Jl4QnSlYOmLSE7yEpTPIU1HeRMWiYCjuVcM-h4mXcvvu4eBS6U6SBUG0sftjRBcwmMehbiunilawgnlCdFDPId1LCc0oQNcV7ch4c91yQuVMyXpJ4wlqzTOsvEE149JLNQogwpaERlzkqxnOU1Dyk2WpRLXK7UagOD6HJ_i-nb5g7L6VPb2dvb3K9X9vZ2Pdqu7td0SnuF6vlauqF-1XKvs71Z3KpVqdVHCn4KENIvjEqZhJBnv5m8ZeNks_gfeeR8x)
+```mermaid
+flowchart TD
+  START[User Message] --> FIRST{First Turn?}
+  
+  FIRST -->|Yes| EXTRACT[Extract Goal<br/>Parse <goal> tag]
+  FIRST -->|No| LOAD[Load Context C_t]
+  
+  EXTRACT --> CREATE[Create Context C_0<br/>goal set, empty summaries]
+  LOAD --> CHECK_BUDGET{Token Budget OK?}
+  
+  CREATE --> BUILD[Build System Instruction]
+  CHECK_BUDGET -->|No| ENFORCE[Enforce Budget<br/>Remove oldest summaries]
+  CHECK_BUDGET -->|Yes| BUILD
+  ENFORCE --> BUILD
+  
+  BUILD --> FOLD_CHECK{Should Fold?<br/>>50% tokens or >20 summaries}
+  FOLD_CHECK -->|Yes| FOLD_INST[Add Fold Instruction]
+  FOLD_CHECK -->|No| CALL_MODEL[Call LLM]
+  FOLD_INST --> CALL_MODEL
+  
+  CALL_MODEL --> PARSE[Parse Model Response]
+  PARSE --> EXTRACT_CTX[Extract <context> tag]
+  
+  EXTRACT_CTX --> HAS_FOLD{Fold present?}
+  HAS_FOLD -->|Yes| APPLY_FOLD[Apply Fold<br/>Merge micro → macro]
+  HAS_FOLD -->|No| UPDATE_LATEST[Update Latest Interaction]
+  
+  APPLY_FOLD --> AUTO_MICRO[Auto-compress previous<br/>latest → micro summary]
+  AUTO_MICRO --> UPDATE_LATEST
+  
+  UPDATE_LATEST --> HAS_TOOL{Function Calls?}
+  HAS_TOOL -->|Yes| WAIT_TOOL[Wait for tool results]
+  HAS_TOOL -->|No| SAVE["Save Context C_{t+1}"]
+  
+  WAIT_TOOL --> UPDATE_OBS[Update observation<br/>with tool evidence]
+  UPDATE_OBS --> SAVE
+  
+  SAVE --> RETURN[Return to User]
+  
+
+```
 
 #### Model Dispatcher and Provider Abstraction
 
