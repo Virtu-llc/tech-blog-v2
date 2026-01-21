@@ -21,6 +21,9 @@ export async function GET() {
   # The final login URL will be: {base_url}/{auth_endpoint}?provider=github&site_id=...&scope=...
   auth_endpoint: /api/auth/github
 
+# Enable editorial workflow (Draft / In review / Ready).
+publish_mode: editorial_workflow
+
 # Media files configuration
 media_folder: public/uploads
 public_folder: /uploads
