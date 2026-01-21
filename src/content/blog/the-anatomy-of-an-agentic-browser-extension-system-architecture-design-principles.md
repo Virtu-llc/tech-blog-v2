@@ -28,7 +28,7 @@ system, decomposed into three primary distinct components: the on-device Extensi
 (runtime), the cloud-based Backend (orchestration), and the Web
 Console (control plane).
 
-## Background & Motivation: The Browser as an Execution Environment
+## Background and Motivation
 
 The browser is the operating system for modern work. It hosts authenticated sessions, rich user interfaces, and domain-specific workflows. However, for an automated agent, the browser represents a hostile execution environment characterized by dynamic DOM structures, rate limits, and ephemeral states.
 This inherent tension necessitates a strict architectural decoupling:
@@ -109,11 +109,13 @@ while not run.is_done():
 ### 3. The Web Console: Operational Governance
 While the extension handles execution, the Web Console manages governance. It serves as the hub for Onboarding (device linking), Configuration (playbook management, safe domain allow-listing), and Commercial logic (subscriptions and usage limits). This separation allows business logic to evolve independently of the extension's release cycle.
 ## Cross-Cutting Design Principles
-Reliability in distributed agentic systems is not accidental; it is the result of adhering to specific design principles.
-### 1. Principle of Least Privilege
-Why: The extension possesses significant power over the user's authenticated sessions. Implementation: Permissions must be scoped strictly to the host. Sensitive tools should require explicit "human-in-the-loop" confirmation before execution.
+Reliability in distributed agentic systems is not accidental; it is the result of architectural discipline. To bridge the gap between stochastic models and deterministic browsers, we adhere to six core principles.
+
+### 1. The Principle of Least Privilege
+Since the extension acts as a proxy for the user's authenticated session, it effectively operates with "hands on the keyboard." To mitigate security risks, we strictly scope host permissions to the active tab and gate sensitive actions behind explicit "human-in-the-loop" confirmation. The agent should never possess more authority than is immediately necessary for the current task.
+
 ### 2. Contract-First Messaging
-Why: Ad-hoc message structures lead to fragility in distributed systems. Implementation: We define a strict, versioned event schema. This ensures forward and backward compatibility between the client and server.
+Distributed systems degrade quickly when communication relies on ad-hoc message strings. To ensure stability, we enforce Contract-First Messaging. By defining a strict, versioned event schema, we guarantee forward and backward compatibility between the extension client and the cloud backend, preventing "silent failures" caused by schema drift.
 ```typescript
 type EventEnvelope<T> = {
   v: 1
@@ -126,13 +128,16 @@ type EventEnvelope<T> = {
 
 ```
 ### 3. Streaming-First User Experience
-Why: Users require visibility into the system's "thought process" to build trust. Implementation: The UI streams granular updates—"Planning," "Locating element," "Clicking"—rather than waiting for a final response.
+In an agentic context, latency is inevitable. To build and maintain user trust, the system must never appear static. We prioritize a Streaming-First UX, where the backend emits granular state updates—planning, locating elements, clicking—in real-time. This provides the user with immediate visibility into the agent's "thought process" rather than forcing them to wait for a final, opaque response.
+
 ### 4. Interruptibility and Idempotency
-Why: Web environments are unpredictable, and user intent may change mid-flight. Implementation: The architecture supports immediate cancellation tokens. Furthermore, tools are designed to be idempotent (e.g., "Ensure Checked" vs. "Toggle") to allow for safe retries.
+Real-world web environments are non-deterministic, and user intent often shifts mid-task. The architecture handles this chaos through Interruptibility (via immediate cancellation tokens) and Idempotency. Tools are designed to be safe on retry—for example, preferring an explicit "Ensure Checkbox is Checked" action over a relative "Toggle Checkbox" action—allowing the agent to recover gracefully from network blips or DOM shifts.
+
 ### 5. Evidence-Based Execution
-Why: To mitigate model hallucinations in a functional environment. Implementation: The agent must verify its actions. Tools return concrete evidence (HTML snapshots, current URLs) which the agent uses to ground its subsequent decisions.
+To mitigate the risk of model hallucination in a functional environment, the system enforces Evidence-Based Execution. The agent is not permitted to assume an action was successful based solely on its own output. Instead, tools must return concrete artifacts—such as HTML snapshots, extracted text, or URL verifications—which serve as the ground truth for subsequent reasoning steps.
+
 ### 6. Observability by Design
-Why: Debugging non-deterministic agents requires deep introspection. Implementation: Every interaction is traced with a unique runId and requestId, linking the UI state, backend logic, and browser execution into a single coherent log.
+Debugging non-deterministic agents requires deep introspection. We achieve Observability by Design by tagging every interaction with unique runId and requestId identifiers. This allows us to trace a specific failure from the frontend UI state, through the backend orchestration logic, down to the specific DOM execution event in a single, coherent log.
 ## Conclusion
 Building an agentic browser extension is an exercise in system design, not just prompt engineering. By architecting a clean separation between the execution runtime (Extension), the orchestration brain (Backend), and the management layer (Console), we can create systems that are robust, secure, and capable of performing real-world work.
 The future of agents lies not just in smarter models, but in better architectures that can harness those models safely and effectively.
