@@ -198,6 +198,17 @@ const hasAuthorInfo = Boolean(
 				</div>
 			</article>
 		</main>
+		<div
+			id="img-lightbox"
+			class="img-lightbox"
+			role="dialog"
+			aria-modal="true"
+			aria-hidden="true"
+		>
+			<div class="img-lightbox__content" role="document">
+				<img id="img-lightbox-img" alt="" />
+			</div>
+		</div>
 		<Footer />
 	</body>
 </html>
@@ -510,5 +521,54 @@ const hasAuthorInfo = Boolean(
 			}
 		});
 	});
+
+	// Image click-to-zoom (lightbox)
+	function setupImageLightbox() {
+		const lightbox = document.getElementById('img-lightbox');
+		const lightboxImg = document.getElementById('img-lightbox-img');
+		if (!lightbox || !lightboxImg) return;
+
+		function open(img) {
+			const src = img?.currentSrc || img?.src;
+			if (!src) return;
+			lightboxImg.src = src;
+			lightboxImg.alt = img?.alt || '';
+			lightbox.classList.add('is-open');
+			lightbox.setAttribute('aria-hidden', 'false');
+			document.body.style.overflow = 'hidden';
+		}
+
+		function close() {
+			lightbox.classList.remove('is-open');
+			lightbox.setAttribute('aria-hidden', 'true');
+			document.body.style.overflow = '';
+			// Let the fade-out finish before clearing src (prevents flicker)
+			window.setTimeout(() => {
+				if (!lightbox.classList.contains('is-open')) {
+					lightboxImg.src = '';
+				}
+			}, 200);
+		}
+
+		lightbox.addEventListener('click', close);
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape') close();
+		});
+
+		document.querySelectorAll('.post-content img').forEach((img) => {
+			// Don't hijack linked images
+			if (img.closest('a')) return;
+			img.addEventListener('click', (e) => {
+				e.preventDefault();
+				open(img);
+			});
+		});
+	}
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', setupImageLightbox);
+	} else {
+		setupImageLightbox();
+	}
 </script>
 

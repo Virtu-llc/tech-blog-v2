@@ -14,6 +14,12 @@
 	--foreground: #ededed;
 }
 
+/* Prevent layout shift when scrollbars appear/disappear */
+html,
+body {
+	scrollbar-gutter: stable;
+}
+
 @theme inline {
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
@@ -189,4 +195,64 @@ body {
 	clip: rect(1px, 1px, 1px, 1px);
 	clip-path: inset(50%);
 	white-space: nowrap;
+}
+
+/* Blog image click-to-zoom (lightbox) */
+.blog-content img {
+	cursor: zoom-in;
+}
+
+.img-lightbox {
+	position: fixed;
+	inset: 0;
+	z-index: 9999;
+	align-items: center;
+	justify-content: center;
+	padding: 1.5rem;
+	background: rgba(0, 0, 0, 0.85);
+
+	/* Smooth open/close */
+	display: flex;
+	opacity: 0;
+	visibility: hidden;
+	pointer-events: none;
+	transition: opacity 180ms ease, visibility 0s linear 180ms;
+	will-change: opacity;
+}
+
+.img-lightbox.is-open {
+	opacity: 1;
+	visibility: visible;
+	pointer-events: auto;
+	transition: opacity 180ms ease;
+}
+
+.img-lightbox__content {
+	/* Unified display box (responsive) */
+	width: min(1100px, 95vw);
+	height: min(720px, 95vh);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.img-lightbox img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	border-radius: 0.75rem;
+	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+	cursor: zoom-out;
+
+	/* Smooth zoom-in */
+	opacity: 0;
+	transform: scale(0.98);
+	transition: transform 180ms ease, opacity 180ms ease;
+	will-change: transform, opacity;
+}
+
+.img-lightbox.is-open img {
+	opacity: 1;
+	transform: scale(1);
 }
