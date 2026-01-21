@@ -24,9 +24,9 @@ within the confines of third-party websites while strictly adhering to user
 permissions and security boundaries.
 
 This article provides a macro-level architectural analysis of such a
-system, decomposed into three primary distinct components: the on-device Extension
-(runtime), the cloud-based Backend (orchestration), and the Web
-Console (control plane).
+system, decomposed into three primary distinct components: **the on-device Extension
+(runtime)**, **the cloud-based Backend (orchestration)**, and **the Web
+Console (control plane)**.
 
 ## Background and Motivation
 
