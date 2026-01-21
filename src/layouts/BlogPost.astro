@@ -50,6 +50,12 @@ const hasAuthorInfo = Boolean(
 			integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV"
 			crossorigin="anonymous"
 		/>
+		<!-- Mermaid -->
+		<script type="module">
+			import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+			mermaid.initialize({ theme: 'dark' });
+			window.mermaid = mermaid;
+		</script>
 	</head>
 
 	<body class="min-h-screen overflow-x-hidden bg-[#050505] font-sans text-gray-300 selection:bg-white/20 selection:text-white">
@@ -571,6 +577,49 @@ const hasAuthorInfo = Boolean(
 		document.addEventListener('DOMContentLoaded', setupImageLightbox);
 	} else {
 		setupImageLightbox();
+	}
+
+	// Mermaid rendering
+	function renderMermaid() {
+		// Try multiple selectors to find mermaid code blocks
+		const codes = document.querySelectorAll('pre code.language-mermaid, pre code.lang-mermaid, pre code[class*="mermaid"]');
+		if (codes.length === 0) return;
+
+		// Wait for mermaid to load (max 5 seconds)
+		let attempts = 0;
+		const maxAttempts = 50;
+		function tryRender() {
+			if (!window.mermaid) {
+				attempts++;
+				if (attempts < maxAttempts) {
+					setTimeout(tryRender, 100);
+				}
+				return;
+			}
+
+			codes.forEach((code) => {
+				const pre = code.parentElement;
+				if (!pre || pre.dataset.mermaidProcessed) return;
+				
+				const text = code.textContent || code.innerText || '';
+				if (!text.trim()) return;
+				
+				const div = document.createElement('div');
+				div.className = 'mermaid';
+				div.textContent = text.trim();
+				pre.replaceWith(div);
+				pre.dataset.mermaidProcessed = 'true';
+			});
+
+			window.mermaid.run();
+		}
+		tryRender();
+	}
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', renderMermaid);
+	} else {
+		renderMermaid();
 	}
 </script>
 
