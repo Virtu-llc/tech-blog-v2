@@ -83,7 +83,7 @@ The backend transforms probabilistic model outputs into a reliable product. Its 
 * Playbooks: Stores versioned, structured workflows that guide the agent's decision-making.
   A simplified conceptual representation of the agent loop is as follows:
 
-```
+```python
 while not run.is_done():
     step = llm.next_step(context=run.context, tools=tool_registry)
 
@@ -114,7 +114,7 @@ Reliability in distributed agentic systems is not accidental; it is the result o
 Why: The extension possesses significant power over the user's authenticated sessions. Implementation: Permissions must be scoped strictly to the host. Sensitive tools should require explicit "human-in-the-loop" confirmation before execution.
 ### 2. Contract-First Messaging
 Why: Ad-hoc message structures lead to fragility in distributed systems. Implementation: We define a strict, versioned event schema. This ensures forward and backward compatibility between the client and server.
-```
+```typescript
 type EventEnvelope<T> = {
   v: 1
   runId: string

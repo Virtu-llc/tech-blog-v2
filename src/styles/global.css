@@ -6,6 +6,7 @@
 @import "@fontsource/geist-mono/500.css";
 @import "@fontsource/geist-mono/600.css";
 @import "tailwindcss";
+@import "prismjs/themes/prism-tomorrow.css";
 
 /* Dark theme color variables */
 :root {
