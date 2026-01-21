@@ -55,7 +55,7 @@ To understand how these components interact, we examine two critical workflows: 
 
 The extension functions as a privileged interface for the user's account. Therefore, authentication must be treated as a strict system boundary. We utilize a PKCE (Proof Key for Code Exchange) flow to unify the identity across the web console and the extension without compromising security.
 
-![](/uploads/screenshot-2026-01-20-at-7.00.53 pm.png)
+![](/uploads/flow-1.png)
 
 ### Flow 2: The Agent Execution Loop
 
