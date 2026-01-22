@@ -39,16 +39,31 @@ const blog = defineCollection({
 			category: z.string(),
 			// Excerpt for post preview
 			excerpt: z.string(),
-			// Optional author information
-			authorId: z.string().optional(),
-			author: z
-				.object({
-					name: z.string().optional(),
-					avatarImage: z.string().optional(),
-					avatarUrl: z.string().optional(),
-					website: httpsUrl,
-				})
-				.optional(),
+			// Authors support (single or multiple)
+			// Accepts both single value and array, normalizes to array
+			authorIds: z.preprocess(
+				(val) => {
+					if (val == null) return undefined;
+					return Array.isArray(val) ? val : [val];
+				},
+				z.array(z.string()).optional()
+			),
+			authors: z.preprocess(
+				(val) => {
+					if (val == null) return undefined;
+					return Array.isArray(val) ? val : [val];
+				},
+				z
+					.array(
+						z.object({
+							name: z.string().optional(),
+							avatarImage: z.string().optional(),
+							avatarUrl: z.string().optional(),
+							website: httpsUrl,
+						})
+					)
+					.optional()
+			),
 		}),
 });
 

@@ -12,31 +12,44 @@ type Props = CollectionEntry<'blog'>['data'] & {
 };
 
 const props = Astro.props as Props;
-const { title, description, pubDate, updatedDate, heroImage, category, author, authorId, slug } = props;
+const { title, description, pubDate, updatedDate, heroImage, category, authorIds, authors, slug } = props;
 
 // Configure the external views API base (e.g. https://your-app.vercel.app).
 // For GitHub Pages, this MUST be set to your deployed API origin.
 const viewsApiBase = (import.meta.env.PUBLIC_API_BASE ?? '').replace(/\/+$/, '');
 
-let resolvedAuthor = author;
-if (authorId) {
-	try {
-		const entry = await getEntry('authors', authorId);
-		if (entry) resolvedAuthor = entry.data;
-	} catch {
-		// Ignore missing/invalid authorId
+// Resolve authors (handles both single and multiple authors)
+const resolveAuthors = async () => {
+	const resolvedAuthors: Array<{
+		name?: string;
+		avatarImage?: string;
+		avatarUrl?: string;
+		website?: string;
+	}> = [];
+
+	// Handle authorIds (from Authors collection)
+	if (authorIds && authorIds.length > 0) {
+		for (const id of authorIds) {
+			try {
+				const entry = await getEntry('authors', id);
+				if (entry) resolvedAuthors.push(entry.data);
+			} catch {
+				// Ignore missing/invalid authorId
+			}
+		}
 	}
-}
-const avatarSrc = resolvedAuthor?.avatarImage || resolvedAuthor?.avatarUrl;
-const websiteHref = (() => {
-	const raw = (resolvedAuthor?.website ?? '').trim();
-	if (!raw) return '';
-	// If no scheme provided, treat it as an https URL (avoid relative navigation).
-	if (/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(raw)) return raw;
-	return `https://${raw.replace(/^\/+/, '')}`;
-})();
-const hasAuthorInfo = Boolean(
-	resolvedAuthor && (resolvedAuthor.name || avatarSrc || resolvedAuthor.website),
+
+	// Handle inline authors
+	if (authors && authors.length > 0) {
+		resolvedAuthors.push(...authors);
+	}
+
+	return resolvedAuthors;
+};
+
+const resolvedAuthors = await resolveAuthors();
+const hasAuthorInfo = resolvedAuthors.length > 0 && resolvedAuthors.some(
+	(a) => a.name || a.avatarImage || a.avatarUrl || a.website
 );
 ---
 
@@ -84,30 +97,46 @@ const hasAuthorInfo = Boolean(
 					<h1 class="post-title">{title}</h1>
 					<div class="post-meta-info">
 						{hasAuthorInfo && (
-							<div class="post-author">
-								{avatarSrc && (
-									<img
-										src={avatarSrc}
-										alt={resolvedAuthor?.name ? `${resolvedAuthor.name} avatar` : 'Author avatar'}
-										class="author-avatar"
-										width="24"
-										height="24"
-									/>
-								)}
-								{resolvedAuthor?.name && (
-									websiteHref ? (
-										<a
-											href={websiteHref}
-											target="_blank"
-											rel="noreferrer"
-											class="author-name-link"
-										>
-											{resolvedAuthor.name}
-										</a>
-									) : (
-										<span class="author-name">{resolvedAuthor.name}</span>
-									)
-								)}
+							<div class="post-authors">
+								{resolvedAuthors.map((author, index) => {
+									const avatarSrc = author.avatarImage || author.avatarUrl;
+									const websiteHref = (() => {
+										const raw = (author.website ?? '').trim();
+										if (!raw) return '';
+										if (/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(raw)) return raw;
+										return `https://${raw.replace(/^\/+/, '')}`;
+									})();
+									return (
+										<>
+											{index > 0 && <span class="author-separator">,</span>}
+											<div class="post-author">
+												{avatarSrc && (
+													<img
+														src={avatarSrc}
+														alt={author.name ? `${author.name} avatar` : 'Author avatar'}
+														class="author-avatar"
+														width="24"
+														height="24"
+													/>
+												)}
+												{author.name && (
+													websiteHref ? (
+														<a
+															href={websiteHref}
+															target="_blank"
+															rel="noreferrer"
+															class="author-name-link"
+														>
+															{author.name}
+														</a>
+													) : (
+														<span class="author-name">{author.name}</span>
+													)
+												)}
+											</div>
+										</>
+									);
+								})}
 							</div>
 						)}
 						<div class="post-meta-details">
@@ -308,6 +337,18 @@ const hasAuthorInfo = Boolean(
 		font-size: 0.875rem;
 		letter-spacing: 0.05em;
 		color: #9ca3af;
+	}
+
+	.post-authors {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.author-separator {
+		color: #6b7280;
+		margin: 0 0.25rem;
 	}
 
 	.post-author {

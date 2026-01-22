@@ -80,32 +80,46 @@ collections:
           hint: "Relative path, e.g.: ../../assets/blog-placeholder-1.jpg or /uploads/image.jpg"
         }
       - {
-          label: "Author (pick from Authors)",
-          name: "authorId",
+          label: "Authors (pick from Authors collection)",
+          name: "authorIds",
           widget: "relation",
           collection: "authors",
           search_fields: ["name"],
           display_fields: ["name"],
           value_field: "{{slug}}",
-          multiple: false,
-          required: false
+          multiple: true,
+          required: false,
+          hint: "Select one or more authors from the Authors collection. Single author is just an array with one item."
         }
       - {
-          label: "Author",
-          name: "author",
-          widget: "object",
+          label: "Authors (Inline)",
+          name: "authors",
+          widget: "list",
           required: false,
-          fields: [
-            { label: "Name", name: "name", widget: "string", required: false },
-            {
-              label: "Avatar Image",
-              name: "avatarImage",
-              widget: "image",
-              required: false,
-              hint: "Upload an image (or paste an image URL if your media library allows it)."
-            },
-            { label: "Website", name: "website", widget: "string", required: false, pattern: ["^https://", "Must start with https://"] }
-          ]
+          hint: "Add one or more inline authors. Each author can have name, avatar, and website.",
+          field: {
+            label: "Author",
+            name: "author",
+            widget: "object",
+            fields: [
+              { label: "Name", name: "name", widget: "string", required: false },
+              {
+                label: "Avatar Image",
+                name: "avatarImage",
+                widget: "image",
+                required: false,
+                hint: "Upload an image (or paste an image URL if your media library allows it)."
+              },
+              {
+                label: "Avatar URL",
+                name: "avatarUrl",
+                widget: "string",
+                required: false,
+                hint: "Alternative to Avatar Image - paste a URL directly."
+              },
+              { label: "Website", name: "website", widget: "string", required: false, pattern: ["^https://", "Must start with https://"] }
+            ]
+          }
         }
       - { label: "Body", name: "body", widget: "markdown", required: true }
 `;
