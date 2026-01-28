@@ -43,4 +43,23 @@
 		background: rgba(128, 128, 128, 0.05);
 		filter: blur(120px);
 	}
+
+	/* Reduce blur intensity on mobile for better performance */
+	@media (max-width: 768px) {
+		.blur-circle-1 {
+			filter: blur(80px);
+		}
+
+		.blur-circle-2 {
+			filter: blur(60px);
+		}
+	}
+
+	/* Disable blur on very low-end devices */
+	@media (max-width: 480px) and (prefers-reduced-motion: no-preference) {
+		.blur-circle-1,
+		.blur-circle-2 {
+			filter: blur(40px);
+		}
+	}
 </style>

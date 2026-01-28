@@ -271,67 +271,81 @@ const NAV_LINKS = [
 </style>
 
 <script>
-	// Mobile menu toggle functionality
-	const navbar = document.getElementById('navbar');
-	const menuButton = document.getElementById('mobile-menu-button');
-	const mobileMenu = document.getElementById('mobile-menu');
-	const overlay = document.getElementById('mobile-menu-overlay');
+	// Mobile menu toggle functionality - execute immediately for better mobile UX
+	(function() {
+		const navbar = document.getElementById('navbar');
+		const menuButton = document.getElementById('mobile-menu-button');
+		const mobileMenu = document.getElementById('mobile-menu');
+		const overlay = document.getElementById('mobile-menu-overlay');
 
-	if (menuButton && mobileMenu && overlay) {
-		menuButton.addEventListener('click', () => {
-			const isOpen = navbar?.getAttribute('data-menu-open') === 'true';
-			navbar?.setAttribute('data-menu-open', String(!isOpen));
-			overlay.setAttribute('data-visible', String(!isOpen));
-		});
+		// Initialize menu button immediately to ensure it's clickable
+		if (menuButton && mobileMenu && overlay) {
+			menuButton.addEventListener('click', () => {
+				const isOpen = navbar?.getAttribute('data-menu-open') === 'true';
+				navbar?.setAttribute('data-menu-open', String(!isOpen));
+				overlay.setAttribute('data-visible', String(!isOpen));
+			});
 
-		// Close menu when clicking overlay
-		overlay.addEventListener('click', () => {
-			navbar?.setAttribute('data-menu-open', 'false');
-			overlay.setAttribute('data-visible', 'false');
-		});
-
-		// Close menu when clicking a link
-		const mobileLinks = mobileMenu.querySelectorAll('.navbar-link-mobile');
-		mobileLinks.forEach((link) => {
-			link.addEventListener('click', () => {
+			// Close menu when clicking overlay
+			overlay.addEventListener('click', () => {
 				navbar?.setAttribute('data-menu-open', 'false');
 				overlay.setAttribute('data-visible', 'false');
 			});
-		});
-	}
 
-	// Scroll-based visibility
-	let lastScrollY = window.scrollY || 0;
-	
-	const handleScroll = () => {
-		if (!navbar) return;
+			// Close menu when clicking a link
+			const mobileLinks = mobileMenu.querySelectorAll('.navbar-link-mobile');
+			mobileLinks.forEach((link) => {
+				link.addEventListener('click', () => {
+					navbar?.setAttribute('data-menu-open', 'false');
+					overlay.setAttribute('data-visible', 'false');
+				});
+			});
+		}
+
+		// Scroll-based visibility - defer to avoid blocking initial render
+		let lastScrollY = window.scrollY || 0;
+		let scrollTimeout: ReturnType<typeof requestAnimationFrame> | null = null;
 		
-		const currentScrollY = window.scrollY;
-		const scrollDelta = currentScrollY - lastScrollY;
+		const handleScroll = () => {
+			if (!navbar) return;
+			
+			const currentScrollY = window.scrollY;
+			const scrollDelta = currentScrollY - lastScrollY;
 
-		if (currentScrollY < 100) {
-			navbar.setAttribute('data-nav-visible', 'true');
-		} else if (scrollDelta > 5) {
-			navbar.setAttribute('data-nav-visible', 'false');
-		} else if (scrollDelta < -5) {
-			navbar.setAttribute('data-nav-visible', 'true');
+			if (currentScrollY < 100) {
+				navbar.setAttribute('data-nav-visible', 'true');
+			} else if (scrollDelta > 5) {
+				navbar.setAttribute('data-nav-visible', 'false');
+			} else if (scrollDelta < -5) {
+				navbar.setAttribute('data-nav-visible', 'true');
+			}
+
+			if (currentScrollY > 50) {
+				navbar.classList.add('navbar-scrolled');
+			} else {
+				navbar.classList.remove('navbar-scrolled');
+			}
+
+			lastScrollY = currentScrollY;
+		};
+
+		// Throttle scroll handler for better mobile performance
+		const throttledScroll = () => {
+			if (scrollTimeout) return;
+			scrollTimeout = requestAnimationFrame(() => {
+				handleScroll();
+				scrollTimeout = null;
+			});
+		};
+
+		if (navbar) {
+			handleScroll();
+			// Use setTimeout instead of requestAnimationFrame to avoid blocking
+			setTimeout(() => {
+				navbar.classList.add('navbar-initialized');
+			}, 0);
 		}
 
-		if (currentScrollY > 50) {
-			navbar.classList.add('navbar-scrolled');
-		} else {
-			navbar.classList.remove('navbar-scrolled');
-		}
-
-		lastScrollY = currentScrollY;
-	};
-
-	if (navbar) {
-		handleScroll();
-		requestAnimationFrame(() => {
-			navbar.classList.add('navbar-initialized');
-		});
-	}
-
-	window.addEventListener('scroll', handleScroll, { passive: true });
+		window.addEventListener('scroll', throttledScroll, { passive: true });
+	})();
 </script>
